@@ -39,8 +39,8 @@ abstract class Hosts
      */
     protected function __construct($defaultIp = null, $hostsPath = null)
     {
-        $this->defaultIp = $defaultIp ?? $this->defaultIp;
-        $this->hostsPath = $hostsPath ?? $this->hostsPath;
+        $this->defaultIp = (!empty($defaultIp)) ? $defaultIp : $this->defaultIp;
+        $this->hostsPath = (!empty($hostsPath)) ? $hostsPath : $this->hostsPath;
     }
 
     /**

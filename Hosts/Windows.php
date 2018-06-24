@@ -15,12 +15,13 @@ class Windows extends Hosts
     /**
      * @var string
      */
-    protected $defaultIp;
+    protected $defaultIp = '10.0.75.2';
 
     /**
      * @var string
      */
-    protected $hostsPath;
+    protected $hostsPath = 'C:\Windows\System32\drivers\etc\hosts';
+
 
     /**
      * Add host to host file
@@ -32,7 +33,7 @@ class Windows extends Hosts
     public function add($host, $ip = null): void
     {
         $position = $this->getPositionForAdd();
-        $ip       = !empty($ip) ? $ip : $this->dockerIP;
+        $ip       = !empty($ip) ? $ip : $this->defaultIp;
         injectStringInFile($this->hostsPath, $ip . ' ' . $host, $position);
     }
 
@@ -46,10 +47,12 @@ class Windows extends Hosts
         // Set stamps
         $hosts = file_get_contents($this->hostsPath);
         if (!strpos($hosts, $this->endStamp)) {
-            $file = $this->startStamp . PHP_EOL . $this->endStamp . PHP_EOL . $hosts;
+            injectStringInFile($this->hostsPath, $this->endStamp, 0);
+            injectStringInFile($this->hostsPath, $this->startStamp, 0);
+
+            $hosts = file_get_contents($this->hostsPath);
         }
 
-        // Seek position
         if ($position = strpos($hosts, $this->endStamp)) {
             return (int)$position;
         }
@@ -65,7 +68,7 @@ class Windows extends Hosts
      */
     public function delete($host): void
     {
-
+        deleteStringFromFile($this->hostsPath, $host);
     }
 
 }

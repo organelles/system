@@ -5,10 +5,10 @@ if (!function_exists('injectStringInFile')) {
      * Inject string in need position in the file.
      *
      * @param string $file     - path to file
-     * @param string $data     - data for injection
+     * @param string $string   - row for injection
      * @param int    $position - position in the file
      */
-    function injectStringInFile($file, $data, $position)
+    function injectStringInFile($file, $string, $position)
     {
         $fpFile = fopen($file, "rw+");
         $fpTemp = fopen('php://temp', "rw+");
@@ -18,7 +18,7 @@ if (!function_exists('injectStringInFile')) {
         fseek($fpFile, $position);
         fseek($fpTemp, $position);
 
-        fwrite($fpFile, $data . PHP_EOL);
+        fwrite($fpFile, $string . PHP_EOL);
 
         stream_copy_to_stream($fpTemp, $fpFile);
 
@@ -32,11 +32,27 @@ if (!function_exists('deleteStringFromFile')) {
      * Delete a string from the file.
      *
      * @param string $file     - path to file
-     * @param string $data     - data for injection
+     * @param string $string   - data for injection
      * @param int    $position - position in the file
      */
-    function deleteStringFromFile($file, $position)
+    function deleteStringFromFile($file, $string)
     {
+        $rowNumber = 0;
+        $array     = array();
 
+        $read = fopen($file, "r");
+        while (!feof($read)) {
+            $array[$rowNumber] = fgets($read);
+            ++$rowNumber;
+        }
+        fclose($read);
+
+        $write = fopen($file, "w");
+        foreach($array as $value) {
+            if(!strstr($value, $string)) {
+                fwrite($write, $value);
+            }
+        }
+        fclose($write);
     }
 }
