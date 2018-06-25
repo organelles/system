@@ -61,18 +61,62 @@ abstract class Hosts
     /**
      * Add host to host file
      *
-     * @param string      $host
+     * @param string|array $hosts
      * @param string|null $ip
      * @return void
      */
-    abstract public function add($host, $ip = null): void;
+    public function add($hosts, $ip = null): void
+    {
+        $position = $this->getPositionForAdd();
+        $ip       = !empty($ip) ? $ip : $this->defaultIp;
+
+        if (!is_array($hosts)) {
+            $hosts = [$hosts];
+        }
+
+        foreach ($hosts as $host) {
+            injectStringInFile($this->hostsPath, $ip . ' ' . $host, $position);
+        }
+    }
+
+    /**
+     * Get position for add host
+     *
+     * @return int
+     */
+    private function getPositionForAdd(): int
+    {
+        // Set stamps
+        $hosts = file_get_contents($this->hostsPath);
+        if (!strpos($hosts, $this->endStamp)) {
+            injectStringInFile($this->hostsPath, $this->endStamp, 0);
+            injectStringInFile($this->hostsPath, $this->startStamp, 0);
+
+            $hosts = file_get_contents($this->hostsPath);
+        }
+
+        if ($position = strpos($hosts, $this->endStamp)) {
+            return (int)$position;
+        }
+
+        throw new \Exception('We can\'t find need position in a hosts file');
+    }
 
     /**
      * Delete host from host file
      *
-     * @param string $host
+     * @param string|array $hosts
      * @return void
      */
-    abstract public function delete($host): void;
+    public function delete($hosts): void
+    {
+        if (!is_array($hosts)) {
+            $hosts = [$hosts];
+        }
+
+        foreach ($hosts as $host) {
+            deleteStringFromFile($this->hostsPath, $host);
+        }
+    }
 
 }
